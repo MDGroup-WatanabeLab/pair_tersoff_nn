@@ -139,3 +139,7 @@ The mean coordination number within 3.0 Angstrom increases from 4.0 to approxima
 Both pair-style implementations are derived from the original LAMMPS `pair_style tersoff` source and are distributed under the GNU General Public License version 2. The original copyright and license notices are retained in both implementations. See `LICENSE`.
 
 The learned model files and normalization statistics in `models` are distributed separately under the MIT License. The accompanying `Si.tersoff` file remains under the GNU General Public License version 2 as described in the model package README.
+
+## Contact
+
+Yusuke Nishimura: yusukeskelton@toki.waseda.jp
