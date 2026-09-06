@@ -1,0 +1,7 @@
+/direct/build/
+/torchscript/build/
+*.so
+/examples/**/trajectory*.dump
+__pycache__/
+*.py[cod]
+.pytest_cache/

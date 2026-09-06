@@ -1,0 +1,187 @@
+LAMMPS (10 Sep 2025 - Development - patch_10Sep2025-457-gabba7fcf55)
+# 64-atom diamond-Si NVE molecular dynamics
+
+variable dt index 0.001
+variable direct_plugin index ../../direct/build/tersoffnndirectplugin.so
+
+units metal
+dimension 3
+boundary p p p
+atom_style atomic
+
+plugin load ${direct_plugin}
+plugin load ../../direct/build/tersoffnndirectplugin.so
+Loading plugin: Tersoff NN pair style with hand-written MLP inference by Yusuke Nishimura
+
+lattice diamond 5.431
+Lattice spacing in x,y,z = 5.431 5.431 5.431
+region box block 0 2 0 2 0 2
+create_box 1 box
+Created orthogonal box = (0 0 0) to (10.862 10.862 10.862)
+  1 by 1 by 1 MPI processor grid
+create_atoms 1 box
+Created 64 atoms
+  using lattice units in orthogonal box = (0 0 0) to (10.862 10.862 10.862)
+  create_atoms CPU = 0.000 seconds
+mass 1 28.0855
+
+pair_style tersoff_nn_direct model_name ../../models/JSAP_autumn_2026/model_direct.txt input_stats ../../models/JSAP_autumn_2026/input_stats.csv use_gpu no
+pair_coeff * * ../../models/JSAP_autumn_2026/Si.tersoff Si_NN
+Reading tersoff_nn potential file ../../models/JSAP_autumn_2026/Si.tersoff with DATE: 2011-04-26
+
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+
+velocity all create 300.0 4928459 mom yes rot no dist gaussian
+fix integrate all nve
+
+timestep ${dt}
+timestep 0.0010
+thermo 10
+thermo_style custom step time etotal
+thermo_modify format float %.15g
+run 1000
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 5.5
+  ghost atom cutoff = 5.5
+  binsize = 2.75, bins = 4 4 4
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair tersoff_nn_direct, perpetual
+      attributes: full, newton on
+      pair build: full/bin/atomonly
+      stencil: full/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 3.074 | 3.074 | 3.074 Mbytes
+   Step          Time          TotEng    
+         0  0 -286.04675595024
+        10  0.01 -286.045377807506
+        20  0.02 -286.044304843318
+        30  0.03 -286.045754159587
+        40  0.04 -286.045871866176
+        50  0.05 -286.044847868052
+        60  0.06 -286.04503555264
+        70  0.07 -286.045944719968
+        80  0.08 -286.045530430213
+        90  0.09 -286.044799209048
+       100  0.1 -286.045599162246
+       110  0.11 -286.045861479374
+       120  0.12 -286.044884829049
+       130  0.13 -286.045212756439
+       140  0.14 -286.046040801515
+       150  0.15 -286.045433390951
+       160  0.16 -286.044732465119
+       170  0.17 -286.045567850867
+       180  0.18 -286.045891893848
+       190  0.19 -286.044990259949
+       200  0.2 -286.044909587035
+       210  0.21 -286.045664197294
+       220  0.22 -286.04562175254
+       230  0.23 -286.045295318863
+       240  0.24 -286.045610195342
+       250  0.25 -286.045566926005
+       260  0.26 -286.044938049161
+       270  0.27 -286.045202688142
+       280  0.28 -286.045802400436
+       290  0.29 -286.045386971523
+       300  0.3 -286.044952390471
+       310  0.31 -286.045582865142
+       320  0.32 -286.045708599996
+       330  0.33 -286.044978726967
+       340  0.34 -286.045273637242
+       350  0.35 -286.045845746812
+       360  0.36 -286.045419952013
+       370  0.37 -286.045003904675
+       380  0.38 -286.045588227021
+       390  0.39 -286.045740362399
+       400  0.4 -286.044991483095
+       410  0.41 -286.045196234911
+       420  0.42 -286.045812519961
+       430  0.43 -286.04537064269
+       440  0.44 -286.044803451493
+       450  0.45 -286.045461660201
+       460  0.46 -286.045995979057
+       470  0.47 -286.045355846937
+       480  0.48 -286.045143543424
+       490  0.49 -286.045538943912
+       500  0.5 -286.045334468373
+       510  0.51 -286.045239890239
+       520  0.52 -286.045516984631
+       530  0.53 -286.045488131347
+       540  0.54 -286.045046319091
+       550  0.55 -286.045379099207
+       560  0.56 -286.045785159344
+       570  0.57 -286.045285813228
+       580  0.58 -286.04502663244
+       590  0.59 -286.045665339386
+       600  0.6 -286.045682838616
+       610  0.61 -286.045094847386
+       620  0.62 -286.045215326996
+       630  0.63 -286.045743932004
+       640  0.64 -286.045428863886
+       650  0.65 -286.045053557996
+       660  0.66 -286.045480009624
+       670  0.67 -286.045404885967
+       680  0.68 -286.045001462428
+       690  0.69 -286.045579688691
+       700  0.7 -286.046112352412
+       710  0.71 -286.045252582484
+       720  0.72 -286.044686982937
+       730  0.73 -286.045576966175
+       740  0.74 -286.045932543038
+       750  0.75 -286.044993944816
+       760  0.76 -286.044926710695
+       770  0.77 -286.045863010046
+       780  0.78 -286.045667794296
+       790  0.79 -286.044938687121
+       800  0.8 -286.045219542334
+       810  0.81 -286.045792842637
+       820  0.82 -286.04537160231
+       830  0.83 -286.045104086224
+       840  0.84 -286.045667956069
+       850  0.85 -286.045481456481
+       860  0.86 -286.045161589766
+       870  0.87 -286.045462102509
+       880  0.88 -286.045581703719
+       890  0.89 -286.045156993939
+       900  0.9 -286.04489948584
+       910  0.91 -286.045592907849
+       920  0.92 -286.045820886903
+       930  0.93 -286.045335874258
+       940  0.94 -286.045319704931
+       950  0.95 -286.045540310115
+       960  0.96 -286.045254508685
+       970  0.97 -286.045190057416
+       980  0.98 -286.045638584827
+       990  0.99 -286.045490225224
+      1000  1 -286.04510242445
+Loop time of 0.753448 on 1 procs for 1000 steps with 64 atoms
+
+Performance: 114.673 ns/day, 0.209 hours/ns, 1327.232 timesteps/s, 84.943 katom-step/s
+99.9% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.75101    | 0.75101    | 0.75101    |   0.0 | 99.68
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0.0013517  | 0.0013517  | 0.0013517  |   0.0 |  0.18
+Output  | 0.00022277 | 0.00022277 | 0.00022277 |   0.0 |  0.03
+Modify  | 0.00045434 | 0.00045434 | 0.00045434 |   0.0 |  0.06
+Other   |            | 0.0004135  |            |       |  0.05
+
+Nlocal:             64 ave          64 max          64 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:            557 ave         557 max         557 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+FullNghs:         2176 ave        2176 max        2176 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2176
+Ave neighs/atom = 34
+Neighbor list builds = 0
+Dangerous builds = 0
+Total wall time: 0:00:00

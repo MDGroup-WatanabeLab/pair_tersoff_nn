@@ -1,0 +1,38 @@
+# 64-atom diamond-Si NPT molecular dynamics at 300 K and 0 bar
+
+variable backend index direct
+variable direct_plugin index ../../direct/build/tersoffnndirectplugin.so
+variable torchscript_plugin index ../../torchscript/build/tersoffnnplugin.so
+
+units metal
+dimension 3
+boundary p p p
+atom_style atomic
+
+if "${backend} == direct" then &
+  "plugin load ${direct_plugin}" &
+else &
+  "plugin load ${torchscript_plugin}"
+
+lattice diamond 5.431
+region box block 0 2 0 2 0 2
+create_box 1 box
+create_atoms 1 box
+mass 1 28.0855
+
+if "${backend} == direct" then &
+  "pair_style tersoff_nn_direct model_name ../../models/JSAP_autumn_2026/model_direct.txt input_stats ../../models/JSAP_autumn_2026/input_stats.csv use_gpu no" &
+else &
+  "pair_style tersoff_nn model_name ../../models/JSAP_autumn_2026/model_ts.pt input_stats ../../models/JSAP_autumn_2026/input_stats.csv use_gpu no"
+pair_coeff * * ../../models/JSAP_autumn_2026/Si.tersoff Si_NN
+
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+
+velocity all create 300.0 4928459 mom yes rot no dist gaussian
+fix ensemble all npt temp 300.0 300.0 0.1 iso 0.0 0.0 1.0
+
+timestep 0.001
+thermo 100
+thermo_style custom step density
+run 1000

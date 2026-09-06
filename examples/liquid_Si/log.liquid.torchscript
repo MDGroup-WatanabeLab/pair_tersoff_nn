@@ -1,0 +1,109 @@
+LAMMPS (10 Sep 2025 - Development - patch_10Sep2025-457-gabba7fcf55)
+# 512-atom silicon melting run at 3000 K and 0 bar
+
+variable backend index direct
+variable direct_plugin index ../../direct/build/tersoffnndirectplugin.so
+variable torchscript_plugin index ../../torchscript/build/tersoffnnplugin.so
+
+units metal
+dimension 3
+boundary p p p
+atom_style atomic
+
+if "${backend} == direct" then   "plugin load ${direct_plugin}" else   "plugin load ${torchscript_plugin}"
+plugin load ${torchscript_plugin}
+plugin load ../../torchscript/build/tersoffnnplugin.so
+Loading plugin: Tersoff NN pair style using TorchScript by Yusuke Nishimura (yusukeskelton@toki.waseda.jp), Kotaro Takematsu (kotakematsu@toki.waseda.jp)
+
+lattice diamond 5.431
+Lattice spacing in x,y,z = 5.431 5.431 5.431
+region box block 0 4 0 4 0 4
+create_box 1 box
+Created orthogonal box = (0 0 0) to (21.724 21.724 21.724)
+  1 by 1 by 1 MPI processor grid
+create_atoms 1 box
+Created 512 atoms
+  using lattice units in orthogonal box = (0 0 0) to (21.724 21.724 21.724)
+  create_atoms CPU = 0.000 seconds
+mass 1 28.0855
+
+if "${backend} == direct" then   "pair_style tersoff_nn_direct model_name ../../models/JSAP_autumn_2026/model_direct.txt input_stats ../../models/JSAP_autumn_2026/input_stats.csv use_gpu no" else   "pair_style tersoff_nn model_name ../../models/JSAP_autumn_2026/model_ts.pt input_stats ../../models/JSAP_autumn_2026/input_stats.csv use_gpu no"
+pair_style tersoff_nn model_name ../../models/JSAP_autumn_2026/model_ts.pt input_stats ../../models/JSAP_autumn_2026/input_stats.csv use_gpu no
+pair_coeff * * ../../models/JSAP_autumn_2026/Si.tersoff Si_NN
+Reading tersoff_nn potential file ../../models/JSAP_autumn_2026/Si.tersoff with DATE: 2011-04-26
+
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+
+velocity all create 3000.0 4928459 mom yes rot no dist gaussian
+fix ensemble all npt temp 3000.0 3000.0 0.1 iso 0.0 0.0 1.0
+
+compute coordination all coord/atom cutoff 3.0
+compute mean_coordination all reduce ave c_coordination
+dump trajectory all custom 100 trajectory.${backend}.dump id type element x y z
+dump trajectory all custom 100 trajectory.torchscript.dump id type element x y z
+dump_modify trajectory sort id element Si
+
+timestep 0.001
+thermo 100
+thermo_style custom step temp pe ke etotal press density c_mean_coordination
+run 1000
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 5.5
+  ghost atom cutoff = 5.5
+  binsize = 2.75, bins = 8 8 8
+  2 neighbor lists, perpetual/occasional/extra = 1 1 0
+  (1) pair tersoff_nn, perpetual
+      attributes: full, newton on
+      pair build: full/bin/atomonly
+      stencil: full/bin/3d
+      bin: standard
+  (2) compute coord/atom, occasional, copy from (1)
+      attributes: full, newton on
+      pair build: copy
+      stencil: none
+      bin: none
+Per MPI rank memory allocation (min/avg/max) = 3.119 | 3.119 | 3.119 Mbytes
+   Step          Temp          PotEng         KinEng         TotEng         Press         Density     c_mean_coordination
+         0   3000          -2307.9179      198.1558      -2109.7621      39274.126      2.329066       4            
+       100   1421.4723     -2188.7091      93.890994     -2094.8181      17169.216      2.2716325      4.0390625    
+       200   1746.2263     -2175.5762      115.34163     -2060.2346     -12024.403      2.1857245      4.015625     
+       300   1883.5544     -2141.3117      124.41241     -2016.8993     -17857.01       2.1522092      4.0195312    
+       400   2186.746      -2116.9891      144.4388      -1972.5503     -12313.887      2.1801883      4.0664062    
+       500   2329.6205     -2078.5081      153.87594     -1924.6322     -1905.1932      2.2347193      4.2382812    
+       600   2498.1487     -2042.4496      165.00755     -1877.4421     -8865.3803      2.2913118      4.6484375    
+       700   2892.2054     -2022.1374      191.03576     -1831.1016      1157.1145      2.360239       4.9765625    
+       800   2877.8711     -1977.9102      190.08895     -1787.8213      10746.246      2.4098713      5.2578125    
+       900   3011.1903     -1951.8626      198.89494     -1752.9677      11633.078      2.419181       5.296875     
+      1000   3221.3304     -1953.0084      212.77511     -1740.2333      15300.375      2.3921697      5.2421875    
+Loop time of 13.0074 on 1 procs for 1000 steps with 512 atoms
+
+Performance: 6.642 ns/day, 3.613 hours/ns, 76.879 timesteps/s, 39.362 katom-step/s
+65.9% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 12.959     | 12.959     | 12.959     |   0.0 | 99.63
+Neigh   | 0.019284   | 0.019284   | 0.019284   |   0.0 |  0.15
+Comm    | 0.0053285  | 0.0053285  | 0.0053285  |   0.0 |  0.04
+Output  | 0.0042069  | 0.0042069  | 0.0042069  |   0.0 |  0.03
+Modify  | 0.015995   | 0.015995   | 0.015995   |   0.0 |  0.12
+Other   |            | 0.003406   |            |       |  0.03
+
+Nlocal:            512 ave         512 max         512 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           1248 ave        1248 max        1248 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+FullNghs:        17698 ave       17698 max       17698 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 17698
+Ave neighs/atom = 34.566406
+Neighbor list builds = 30
+Dangerous builds = 0
+Total wall time: 0:00:13
